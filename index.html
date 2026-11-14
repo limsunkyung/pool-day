@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>동네 수영장의 하루</title>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=VT323&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sky1:#151b35;--sky2:#2c3463;--wall:#dde2ea;--wall2:#cdd3dd;--deck:#d5dae2;
+    --water:#3bb6d6;--water2:#227fa0;--ink:#2c3653;--frame:#f4f7fb;--city:#1b2140;--sun:#ffb070;
+  }
+  *{box-sizing:border-box}
+  html{color-scheme:light dark}
+  body{margin:0;min-height:100vh;
+    background:color-mix(in srgb, var(--wall2) 86%, black 14%);
+    font-family:'Gowun Dodum',system-ui,sans-serif;color:var(--ink);
+    display:flex;flex-direction:column;align-items:center;padding:26px 14px 34px;gap:14px}
+  svg{display:block;width:100%;height:auto}
+  .ink{stroke:var(--ink);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
+  .t{fill:var(--ink);font-family:'Gowun Dodum',system-ui,sans-serif}
+  .f-wall{fill:var(--wall)} .f-wall2{fill:var(--wall2)} .f-deck{fill:var(--deck)} .f-frame{fill:var(--frame)}
+  .f-city{fill:var(--city)} .s-frame{stroke:var(--frame)}
+
+  /* 벽 안내판에 마운트된 느낌: 모서리 볼트 4개 */
+  .frameWrap,.modalCard{
+    position:relative;background-repeat:no-repeat;
+    background-image:
+      radial-gradient(circle at 13px 13px, color-mix(in srgb, var(--ink) 42%, transparent) 0 2.3px, transparent 3px),
+      radial-gradient(circle at calc(100% - 13px) 13px, color-mix(in srgb, var(--ink) 42%, transparent) 0 2.3px, transparent 3px),
+      radial-gradient(circle at 13px calc(100% - 13px), color-mix(in srgb, var(--ink) 42%, transparent) 0 2.3px, transparent 3px),
+      radial-gradient(circle at calc(100% - 13px) calc(100% - 13px), color-mix(in srgb, var(--ink) 42%, transparent) 0 2.3px, transparent 3px);
+  }
+
+  .frameWrap{
+    width:min(1200px,100%);padding:9px;border-radius:6px;
+    background-color:color-mix(in srgb, var(--frame) 32%, var(--wall2) 68%);
+    border:1px solid color-mix(in srgb, var(--frame) 65%, black 20%);
+    box-shadow:0 16px 36px rgba(0,0,0,.32);
+  }
+  .card{border-radius:3px;overflow:hidden;line-height:0}
+
+  .panel{width:min(1200px,100%);display:flex;align-items:center;gap:14px;padding:10px 14px;border-radius:6px;
+    background:color-mix(in srgb, var(--frame) 28%, var(--wall2) 72%);
+    border:1px solid color-mix(in srgb, var(--frame) 60%, black 15%);}
+  #play{flex:none;width:44px;height:44px;min-width:44px;border-radius:4px;cursor:pointer;
+    border:1px solid color-mix(in srgb, var(--frame) 60%, black 10%);
+    background:color-mix(in srgb, var(--wall2) 90%, var(--frame) 10%);color:var(--ink);
+    display:flex;align-items:center;justify-content:center}
+  #play.on{background:var(--ink);color:var(--wall2)}
+  #play:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+  #fsBtn{flex:none;width:44px;height:44px;min-width:44px;border-radius:4px;cursor:pointer;
+    border:1px solid color-mix(in srgb, var(--frame) 60%, black 10%);
+    background:color-mix(in srgb, var(--wall2) 90%, var(--frame) 10%);color:var(--ink);
+    display:flex;align-items:center;justify-content:center}
+  #fsBtn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+
+  body.fsRecording{padding:0;gap:0;background:var(--wall2);min-height:calc(100vh + 1px);
+    display:flex;align-items:center;justify-content:center}
+  body.fsRecording .panel,body.fsRecording .status,body.fsRecording .entryChip,body.fsRecording .caption{display:none}
+  body.fsRecording .frameWrap{padding:0;border:none;box-shadow:none;border-radius:0;background:none;
+    width:100vw;max-width:100vw}
+  body.fsRecording .card{width:100%;height:100vh;border-radius:0;background:var(--wall2)}
+  body.fsRecording svg#scene{width:100vw;height:100vh;max-width:none}
+  .timeline{flex:1;min-width:0}
+  .timeline input[type=range]{width:100%;display:block;margin:0;-webkit-appearance:none;appearance:none;background:transparent;height:18px}
+  .timeline input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:2px;
+    background-color:color-mix(in srgb, var(--frame) 35%, var(--wall2) 65%);
+    background-image:repeating-linear-gradient(to right, color-mix(in srgb, var(--ink) 40%, transparent) 0 1px, transparent 1px 6.25%)}
+  .timeline input[type=range]::-webkit-slider-thumb{appearance:none;width:12px;height:18px;margin-top:-6px;border-radius:2px;cursor:pointer;
+    background:var(--ink);border:1px solid color-mix(in srgb, var(--frame) 60%, black 20%)}
+  .timeline input[type=range]::-moz-range-track{height:6px;border-radius:2px;
+    background-color:color-mix(in srgb, var(--frame) 35%, var(--wall2) 65%);
+    background-image:repeating-linear-gradient(to right, color-mix(in srgb, var(--ink) 40%, transparent) 0 1px, transparent 1px 6.25%)}
+  .timeline input[type=range]::-moz-range-thumb{width:12px;height:18px;border-radius:2px;cursor:pointer;
+    background:var(--ink);border:1px solid color-mix(in srgb, var(--frame) 60%, black 20%)}
+  .timeline input[type=range]:focus-visible{outline:none}
+  .timeline input[type=range]:focus-visible::-webkit-slider-thumb{outline:2px solid var(--ink);outline-offset:2px}
+  .clockReadout{flex:none;display:flex;flex-direction:column;align-items:flex-end;min-width:88px;line-height:1.15}
+  #lblTime{font-family:'VT323',monospace;font-size:25px;color:var(--ink);font-variant-numeric:tabular-nums}
+  #lblPeriod{font-size:11px;color:color-mix(in srgb, var(--ink) 72%, var(--frame) 28%)}
+
+  .caption{width:min(1200px,100%);font-size:12.5px;line-height:1.5;margin:0;padding:0 4px;
+    color:color-mix(in srgb, var(--ink) 68%, var(--frame) 32%)}
+  .status{width:min(1200px,100%);display:flex;align-items:center;gap:7px;font-size:12.5px;margin:0;padding:0 4px;
+    color:color-mix(in srgb, var(--ink) 80%, var(--frame) 20%)}
+  .status .dot{width:7px;height:7px;border-radius:50%;flex:none;background:var(--ink);opacity:.3;transition:opacity .3s,background-color .3s}
+  .status .dot.live{opacity:1;background:var(--sun)}
+
+  .entryChip{width:min(1200px,100%);min-height:36px;font:inherit;font-size:12.5px;text-align:left;
+    padding:0 10px;margin:0;cursor:pointer;border-radius:3px;
+    border:1px solid color-mix(in srgb, var(--frame) 60%, black 15%);
+    background:color-mix(in srgb, var(--frame) 28%, var(--wall2) 72%);
+    color:color-mix(in srgb, var(--ink) 85%, var(--frame) 15%)}
+  .entryChip:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+
+  body.portrait{padding:10px 8px 10px;gap:8px}
+  body.portrait .frameWrap{width:auto;padding:6px}
+  body.portrait .card{background:var(--deck)}
+  body.portrait svg#scene{height:calc(100svh - 168px);width:auto;max-width:calc(100vw - 28px);margin:0 auto}
+  body.portrait .status,body.portrait .entryChip{font-size:11.5px}
+  body.portrait .panel{padding:6px 10px}
+  body.portrait .caption{display:none}
+  body.modalOpen .frameWrap{filter:brightness(.55) saturate(.7)}
+  body.modalOpen .panel,body.modalOpen .caption,body.modalOpen .status{opacity:.35}
+
+  #entryModal{position:fixed;inset:0;background:rgba(6,8,14,.62);display:flex;align-items:center;justify-content:center;z-index:50;padding:10px}
+  #entryModal.hidden{display:none}
+  .modalCard{background-color:color-mix(in srgb, var(--frame) 30%, var(--wall2) 70%);
+    border:1px solid color-mix(in srgb, var(--frame) 70%, black 15%);border-radius:6px;
+    padding:14px 16px 12px;width:min(360px,100%);box-shadow:0 20px 50px rgba(0,0,0,.4);color:var(--ink)}
+  .modalCard h2{margin:0 0 8px;font-size:16px;font-weight:400;letter-spacing:.02em;
+    padding-bottom:6px;border-bottom:1px solid color-mix(in srgb, var(--frame) 60%, transparent)}
+  .modalCard label{display:block;font-size:11px;letter-spacing:.03em;margin-bottom:3px;
+    color:color-mix(in srgb, var(--ink) 70%, var(--frame) 30%)}
+  .modalCard input{font:inherit;width:100%;box-sizing:border-box;padding:5px 2px;margin-bottom:9px;
+    border:none;border-bottom:1px solid color-mix(in srgb, var(--frame) 70%, transparent);border-radius:0;
+    background:transparent;color:var(--ink)}
+  .modalCard input:focus{outline:none;border-bottom-color:var(--ink)}
+  .modalCard input::placeholder{color:color-mix(in srgb, var(--ink) 45%, var(--frame) 55%)}
+  .capacityHint{font-size:11px;margin:0 0 9px;padding:6px;text-align:center;border-radius:3px;
+    border:1px dashed color-mix(in srgb, var(--frame) 70%, black 10%);
+    color:color-mix(in srgb, var(--ink) 65%, var(--frame) 35%)}
+
+  .genderChoice{display:grid;grid-template-columns:repeat(2,1fr);gap:2px;margin-bottom:9px;
+    background:color-mix(in srgb, var(--frame) 55%, black 10%);padding:2px;border-radius:3px}
+  .genderChoice button{font:inherit;font-size:12px;border:none;cursor:pointer;min-height:44px;
+    background:color-mix(in srgb, var(--wall2) 92%, var(--frame) 8%);
+    color:color-mix(in srgb, var(--ink) 58%, var(--frame) 42%)}
+  .genderChoice button.on{background:var(--ink);color:var(--wall2)}
+  .genderChoice button:focus-visible{outline:2px solid var(--ink);outline-offset:-2px;z-index:1}
+
+  .laneChoice{display:grid;grid-template-columns:repeat(5,1fr);gap:2px;margin-bottom:9px;
+    background:color-mix(in srgb, var(--frame) 55%, black 10%);padding:2px;border-radius:3px}
+  .laneChoice button{font:inherit;border:none;cursor:pointer;min-height:46px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
+    background:color-mix(in srgb, var(--wall2) 92%, var(--frame) 8%);
+    color:color-mix(in srgb, var(--ink) 58%, var(--frame) 42%)}
+  .laneChoice button .num{font-family:'VT323',monospace;font-size:21px;line-height:1}
+  .laneChoice button .cap{font-size:9px;letter-spacing:.02em}
+  .laneChoice button.on{background:var(--ink);color:var(--wall2);
+    box-shadow:inset 0 -3px 0 0 var(--laneAccent, color-mix(in srgb, var(--frame) 50%, black 20%))}
+  .laneChoice button:nth-child(1).on{--laneAccent:#f2c14e}
+  .laneChoice button:nth-child(2).on{--laneAccent:#e2574c}
+  .laneChoice button:nth-child(3).on{--laneAccent:#3d7dd8}
+  .laneChoice button:nth-child(4).on{--laneAccent:#f2c14e}
+  .laneChoice button:nth-child(5).on{--laneAccent:#3d7dd8}
+  .laneChoice button:focus-visible{outline:2px solid var(--ink);outline-offset:-2px;z-index:1}
+
+  .styleChoice{display:grid;grid-template-columns:repeat(5,1fr);gap:2px;margin-bottom:9px;
+    background:color-mix(in srgb, var(--frame) 55%, black 10%);padding:2px;border-radius:3px}
+  .styleChoice button{font:inherit;font-size:10.5px;padding:0 2px;border:none;cursor:pointer;min-height:44px;
+    background:color-mix(in srgb, var(--wall2) 92%, var(--frame) 8%);
+    color:color-mix(in srgb, var(--ink) 58%, var(--frame) 42%)}
+  .styleChoice button.on{background:var(--ink);color:var(--wall2)}
+  .styleChoice button:focus-visible{outline:2px solid var(--ink);outline-offset:-2px;z-index:1}
+
+  .wearChoice{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-bottom:9px;
+    background:color-mix(in srgb, var(--frame) 55%, black 10%);padding:2px;border-radius:3px}
+  .wearChoice button{font:inherit;font-size:9px;padding:3px 2px;border:none;cursor:pointer;min-height:44px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+    background:color-mix(in srgb, var(--wall2) 92%, var(--frame) 8%);
+    color:color-mix(in srgb, var(--ink) 58%, var(--frame) 42%)}
+  .wearChoice button svg{border-radius:4px;flex:none;width:20px;height:20px}
+  .wearChoice button.on{background:var(--ink);color:var(--wall2)}
+  .wearChoice button:focus-visible{outline:2px solid var(--ink);outline-offset:-2px;z-index:1}
+
+  .modalBtns{display:grid;grid-template-columns:1fr 1fr;gap:2px;
+    background:color-mix(in srgb, var(--frame) 55%, black 10%);padding:2px;border-radius:3px}
+  .modalBtns button{font:inherit;font-size:13px;min-height:44px;border:none;cursor:pointer;
+    background:color-mix(in srgb, var(--wall2) 92%, var(--frame) 8%);color:var(--ink)}
+  #skipBtn{color:color-mix(in srgb, var(--ink) 75%, var(--frame) 25%)}
+  #enterBtn:not(:disabled){background:var(--sun);color:#241207;font-weight:600}
+  #enterBtn:disabled{opacity:.4;cursor:not-allowed}
+  .modalBtns button:focus-visible{outline:2px solid var(--ink);outline-offset:-2px;z-index:1}
+</style>
+</head>
+<body>
+
+<div class="frameWrap">
+<div class="card">
+<svg id="scene" viewBox="0 0 1200 780" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="skyG" gradientUnits="userSpaceOnUse" x1="0" y1="62" x2="0" y2="232">
+      <stop offset="0" style="stop-color:var(--sky1)"/><stop offset="1" style="stop-color:var(--sky2)"/>
+    </linearGradient>
+    <linearGradient id="waterG" gradientUnits="userSpaceOnUse" x1="0" y1="330" x2="0" y2="730">
+      <stop offset="0" style="stop-color:var(--water)"/><stop offset="1" style="stop-color:var(--water2)"/>
+    </linearGradient>
+    <radialGradient id="glow"><stop offset="0" stop-color="#fff1c8" stop-opacity=".75"/><stop offset="1" stop-color="#fff1c8" stop-opacity="0"/></radialGradient>
+    <radialGradient id="sunGlow"><stop offset="0" style="stop-color:var(--sun)" stop-opacity=".55"/><stop offset="1" style="stop-color:var(--sun)" stop-opacity="0"/></radialGradient>
+    <radialGradient id="uwG"><stop offset="0" stop-color="#9ff3ff" stop-opacity=".7"/><stop offset="1" stop-color="#9ff3ff" stop-opacity="0"/></radialGradient>
+    <pattern id="tiles" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" class="ink" style="stroke-width:1;opacity:.13"/>
+    </pattern>
+    <clipPath id="winClip"></clipPath>
+    <clipPath id="deckClip"><rect id="deckClipR" x="0" y="281" width="1200" height="500"/></clipPath>
+    <clipPath id="poolClip"><rect x="150" y="330" width="920" height="400"/></clipPath>
+  </defs>
+  <svg id="wallSvg" x="0" y="0" width="1200" height="280" viewBox="0 0 1200 280">
+
+  <!-- 벽 -->
+  <rect x="0" y="0" width="1200" height="280" class="f-wall"/>
+  <g clip-path="url(#winClip)">
+    <rect x="0" y="62" width="1200" height="170" fill="url(#skyG)"/>
+    <g id="stars"></g>
+    <g id="sun"><circle r="70" fill="url(#sunGlow)"/><circle r="20" style="fill:var(--sun)"/></g>
+    <g id="moon"><circle r="13" fill="#f3efd8"/><circle cx="6" cy="-4" r="12" style="fill:var(--sky1)"/></g>
+    <g id="clouds"></g>
+    <g id="city"></g>
+  </g>
+  <g id="frames"></g>
+  <g id="lamps"></g>
+
+  <!-- 상단 간판 -->
+  <rect x="0" y="0" width="1200" height="34" class="f-wall2"/>
+  <line x1="0" y1="34" x2="1200" y2="34" class="ink"/>
+  <text id="clock" x="18" y="23" class="t" font-size="16">05:24 새벽 수영</text>
+
+  <!-- 벽 하단 타일 -->
+  <rect x="0" y="244" width="1200" height="36" class="f-wall2"/>
+  <g id="wainscot"></g>
+  <line x1="0" y1="280" x2="1200" y2="280" class="ink"/>
+
+  <!-- 화분 -->
+  <g>
+    <path d="M22 280 l4 -26 h20 l4 26z" class="f-frame ink"/>
+    <path d="M36 254 C30 230 18 222 12 214 M36 254 C38 228 44 214 52 206 M36 254 C34 236 30 222 30 206 M36 254 C44 240 56 236 64 232" class="ink" style="stroke-width:2"/>
+    <path d="M1150 280 l4 -26 h20 l4 26z" class="f-frame ink"/>
+    <path d="M1164 254 C1158 232 1146 224 1140 216 M1164 254 C1166 230 1172 216 1180 208 M1164 254 C1172 242 1184 238 1192 234" class="ink" style="stroke-width:2"/>
+  </g>
+
+  </svg>
+  <g id="deckG" clip-path="url(#deckClip)">
+  <!-- 바닥 -->
+  <rect x="0" y="281" width="1200" height="499" class="f-deck"/>
+  <rect x="0" y="281" width="1200" height="499" fill="url(#tiles)"/>
+
+  <!-- 풀 -->
+  <rect x="140" y="320" width="940" height="420" rx="6" class="f-frame ink"/>
+  <rect x="150" y="330" width="920" height="400" fill="url(#waterG)"/>
+  <rect x="150" y="330" width="920" height="400" class="ink"/>
+  <g clip-path="url(#poolClip)">
+    <g id="reflect" fill="#ffffff"></g>
+    <g id="floorLines"></g>
+    <g id="caustics"></g>
+    <g id="uwLights"></g>
+    <g id="ladder" stroke="#dfe6ee" stroke-width="2.4" stroke-linecap="round" fill="none">
+      <path d="M996 326 V352 M1014 326 V352 M996 334 H1014 M996 344 H1014"/>
+    </g>
+    <g id="swimmers"></g>
+    <g id="ropes"></g>
+  </g>
+  <g id="blocks"></g>
+  <g id="starters"></g>
+
+  <!-- 오른쪽 데크 -->
+  <g>
+    <rect x="1104" y="340" width="52" height="46" rx="5" class="f-frame ink"/>
+    <ellipse cx="1130" cy="368" rx="13" ry="9" fill="#e2574c" stroke="#1f2a44" stroke-width="1"/>
+    <circle cx="1130" cy="356" r="6.5" fill="#f1c9a5" stroke="#1f2a44" stroke-width="1"/>
+    <g stroke="#1f2a44" stroke-width="1">
+      <rect x="1110" y="566" width="38" height="26" rx="7" fill="#5bbf8a"/>
+      <rect x="1112" y="560" width="38" height="26" rx="7" fill="#e2574c"/>
+      <rect x="1114" y="554" width="38" height="26" rx="7" fill="#3d7dd8"/>
+      <rect x="1116" y="548" width="38" height="26" rx="7" fill="#f2c14e"/>
+    </g>
+  </g>
+
+  <!-- 아래 데크 소품 -->
+  <g stroke="#1f2a44" stroke-width="1">
+    <ellipse cx="318" cy="758" rx="5" ry="10" fill="#3d7dd8"/><ellipse cx="332" cy="760" rx="5" ry="10" fill="#3d7dd8"/>
+    <ellipse cx="742" cy="757" rx="5" ry="10" fill="#e88fb0"/><ellipse cx="756" cy="759" rx="5" ry="10" fill="#e88fb0"/>
+    <rect x="520" y="748" width="64" height="20" rx="3" fill="#f2c14e"/>
+    <path d="M520 754 H584 M520 762 H584" stroke="#fff" stroke-opacity=".7"/>
+    <rect x="900" y="746" width="10" height="24" rx="3" fill="#bfe6f2"/>
+  </g>
+</g>
+</svg>
+</div>
+</div>
+
+<div class="panel">
+  <button id="play" class="on" type="button" aria-label="일시정지" title="일시정지"></button>
+  <div class="timeline"><input type="range" id="scrub" min="5" max="21" step="0.01" value="5.4" aria-label="시간"></div>
+  <div class="clockReadout"><span id="lblTime">05:24</span><span id="lblPeriod">새벽 수영</span></div>
+  <button id="fsBtn" type="button" aria-label="전체화면으로 10초 녹화용 화면 보기" title="전체화면 (10초)"></button>
+</div>
+<p class="status" id="statusLine"><span class="dot" id="statusDot"></span><span id="statusText">조용히 구경하는 중</span></p>
+<button id="entryChip" class="entryChip" type="button">입장하기</button>
+<p class="caption">새벽 5시부터 저녁 9시까지가 1분에 지나가요. 수영하는 사람들은 항상 같은 속도로 돌고, 하늘과 조명만 빨라집니다.</p>
+
+<div id="entryModal">
+  <div class="modalCard">
+    <h2 id="modalTitle">수영장에 입장해요</h2>
+    <p class="capacityHint" id="capacityHint">지금 10명이 꽉 찼어요. 누가 나가면 다시 눌러주세요.</p>
+    <label for="nameInput">이름</label>
+    <input id="nameInput" maxlength="4" placeholder="예: 민준">
+    <p class="capacityHint" id="nameHint" style="display:none">이름에 못 쓰는 말이 들어있어요. 다른 이름으로 적어주세요.</p>
+    <label>탈의실 선택</label>
+    <div class="genderChoice">
+      <button type="button" data-gender="f">여자 탈의실</button>
+      <button type="button" data-gender="m">남자 탈의실</button>
+    </div>
+    <label>레인 선택</label>
+    <div class="laneChoice">
+      <button type="button" data-lane="1"><span class="num">1</span><span class="cap">초급</span></button>
+      <button type="button" data-lane="2"><span class="num">2</span><span class="cap">출발대</span></button>
+      <button type="button" data-lane="3"><span class="num">3</span><span class="cap">마스터즈</span></button>
+      <button type="button" data-lane="4"><span class="num">4</span><span class="cap">연수</span></button>
+      <button type="button" data-lane="5"><span class="num">5</span><span class="cap">자유</span></button>
+    </div>
+    <label>영법 선택</label>
+    <div class="styleChoice">
+      <button type="button" data-style="free">자유형</button>
+      <button type="button" data-style="back">배영</button>
+      <button type="button" data-style="fly">접영</button>
+      <button type="button" data-style="breast">평영</button>
+      <button type="button" data-style="kick">킥보드</button>
+    </div>
+    <label>복장 선택</label>
+    <div class="wearChoice" id="wearChoice"></div>
+    <div class="modalBtns">
+      <button id="skipBtn" type="button">그냥 구경하기</button>
+      <button id="enterBtn" type="button" disabled>입장하기</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const NS='http://www.w3.org/2000/svg';
+const $=id=>document.getElementById(id);
+function el(tag,attrs,parent){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e;}
+let seed=7;function rnd(){seed=(seed*16807)%2147483647;return(seed-1)/2147483646;}
+
+/* ---------- 가로/세로 레이아웃 ---------- */
+let PORTRAIT=false;
+function layout(){
+  PORTRAIT=innerWidth<innerHeight*0.9;
+  const sc=$('scene'),w=$('wallSvg'),d=$('deckG'),cr=$('deckClipR'),ck=$('clock');
+  document.body.classList.toggle('portrait',PORTRAIT);
+  if(PORTRAIT){
+    const WH=280*500/1080,X0c=92,X1c=1095;
+    sc.setAttribute('viewBox',`0 0 500 ${(WH+X1c-X0c).toFixed(1)}`);
+    w.setAttribute('width',500);w.setAttribute('height',WH.toFixed(2));w.setAttribute('viewBox','60 0 1080 280');
+    d.setAttribute('transform',`translate(780,${(WH-X0c).toFixed(2)}) rotate(90)`);
+    cr.setAttribute('x',X0c);cr.setAttribute('width',X1c-X0c);
+    ck.setAttribute('x',74);ck.setAttribute('font-size',27);ck.setAttribute('y',28);
+  }else{
+    sc.setAttribute('viewBox','0 0 1200 780');
+    w.setAttribute('width',1200);w.setAttribute('height',280);w.setAttribute('viewBox','0 0 1200 280');
+    d.removeAttribute('transform');cr.setAttribute('x',0);cr.setAttribute('width',1200);
+    ck.setAttribute('x',18);ck.setAttribute('font-size',16);ck.setAttribute('y',23);
+  }
+}
+addEventListener('resize',layout);
+
+/* ---------- 정적 요소 생성 ---------- */
+const WIN={x0:70,w:150,gap:32,y:62,h:170};
+const wins=[];for(let i=0;i<6;i++)wins.push(WIN.x0+i*(WIN.w+WIN.gap));
+const clip=$('winClip'),frames=$('frames');
+wins.forEach(x=>{
+  el('rect',{x,y:WIN.y,width:WIN.w,height:WIN.h},clip);
+  el('rect',{x,y:WIN.y,width:WIN.w,height:WIN.h,fill:'none','stroke-width':7,class:'s-frame'},frames);
+  el('path',{d:`M${x+WIN.w/2} ${WIN.y}V${WIN.y+WIN.h}M${x} ${WIN.y+62}H${x+WIN.w}`,fill:'none','stroke-width':5,class:'s-frame'},frames);
+  el('rect',{x:x-3.5,y:WIN.y-3.5,width:WIN.w+7,height:WIN.h+7,class:'ink'},frames);
+  el('rect',{x:x-8,y:WIN.y+WIN.h+3,width:WIN.w+16,height:8,class:'f-frame ink'},frames);
+});
+// 별
+const stars=$('stars');for(let i=0;i<70;i++)el('circle',{cx:rnd()*1200,cy:66+rnd()*120,r:.6+rnd()*1.1,fill:'#fff'},stars);
+// 구름
+const clouds=$('clouds');const cloudList=[];
+for(let i=0;i<4;i++){const g=el('g',{},clouds);
+  el('path',{d:'M0 0 q10 -16 26 -8 q10 -14 28 -4 q18 -2 18 12 z',fill:'#fff','fill-opacity':.9},g);
+  cloudList.push({g,x:rnd()*1200,y:90+rnd()*60,v:4+rnd()*5,s:.8+rnd()*.7});}
+// 도시
+const city=$('city'),cityLit=el('g',{},null);
+const treeSpots=[];
+let cx=-10;while(cx<1210){const w=36+rnd()*56,h=40+rnd()*90;
+  el('rect',{x:cx,y:232-h,width:w,height:h+2,class:'f-city'},city);
+  for(let yy=232-h+8;yy<226;yy+=11)for(let xx=cx+6;xx<cx+w-6;xx+=10)if(rnd()<.45)el('rect',{x:xx,y:yy,width:4,height:5,fill:'#ffd98a'},cityLit);
+  const gap=20+rnd()*22;treeSpots.push(cx+w+gap/2);
+  cx+=w+gap;}
+city.appendChild(cityLit);
+// 은행나무
+const trees=el('g',{},city);
+treeSpots.forEach(x=>{const th=46+rnd()*34,cw=20+rnd()*10;const base=232;
+  el('path',{d:`M${x} ${base}V${base-th*.45}M${x} ${base-th*.55}l-6 -8M${x} ${base-th*.6}l5 -9`,stroke:'var(--trunk)','stroke-width':2.4,fill:'none','stroke-linecap':'round',style:'stroke:var(--trunk)'},trees);
+  el('path',{d:`M${x} ${base-th} C${x+cw*.7} ${base-th*.8} ${x+cw*.75} ${base-th*.35} ${x} ${base-th*.3} C${x-cw*.75} ${base-th*.35} ${x-cw*.7} ${base-th*.8} ${x} ${base-th}Z`,style:'fill:var(--gk)'},trees);
+  for(let k=0;k<7;k++)el('circle',{cx:x+(rnd()-.5)*cw*.9,cy:base-th*(.4+rnd()*.5),r:1.6+rnd()*1.6,style:'fill:var(--gk2)'},trees);
+  el('ellipse',{cx:x,cy:base-1,rx:cw*.6,ry:2.2,style:'fill:var(--gk)',opacity:.8},trees);
+});
+// 떨어지는 은행잎
+const leaves=el('g',{},city);const leafList=[];
+for(let i=0;i<22;i++){const g=el('g',{},leaves);
+  el('path',{d:'M0 0 L-3.5 -4 Q0 -6.5 3.5 -4 Z M0 0 V3',style:'fill:var(--gk);stroke:var(--gk2)','stroke-width':.6},g);
+  leafList.push({g,x:rnd()*1200,y:70+rnd()*160,vx:6+rnd()*10,vy:10+rnd()*12,r:rnd()*360,vr:(rnd()-.5)*160,ph:rnd()*6});}
+// 벽 하단 타일 선
+const wain=$('wainscot');for(let x=0;x<=1200;x+=24)el('line',{x1:x,y1:244,x2:x,y2:280,class:'ink',style:'opacity:.15;stroke-width:1'},wain);
+el('line',{x1:0,y1:244,x2:1200,y2:244,class:'ink',style:'opacity:.5'},wain);
+// 천장 조명
+const lamps=$('lamps');const lampX=[40,236,418,600,782,964,1160];
+const lampGlow=el('g',{},lamps);
+lampX.forEach(x=>{el('circle',{cx:x,cy:48,r:38,fill:'url(#glow)'},lampGlow);});
+lampX.forEach(x=>{el('line',{x1:x,y1:34,x2:x,y2:43,class:'ink'},lamps);el('circle',{cx:x,cy:47,r:4.5,fill:'#fff4d6',class:'ink',style:'fill:#fff4d6'},lamps);});
+// 수면 반사
+const refl=$('reflect');wins.forEach(x=>{el('polygon',{points:`${x+20},330 ${x+130},330 ${x+170},500 ${x+60},500`},refl);});
+// 바닥 레인선
+const POOL={x:150,y:330,w:920,lane:80};
+const fl=$('floorLines');
+for(let i=0;i<5;i++){const y=POOL.y+i*POOL.lane+40;
+  el('path',{d:`M190 ${y}H1030M190 ${y-12}V${y+12}M1030 ${y-12}V${y+12}`,stroke:'#0c2a44','stroke-opacity':.35,'stroke-width':6,fill:'none','stroke-linecap':'round'},fl);}
+// 일렁임
+const caus=$('caustics');const causPaths=[];
+for(let j=0;j<10;j++){let d=`M140 ${338+j*40}`;for(let x=140;x<=1080;x+=15)d+=` L${x} ${338+j*40+Math.sin(x/22+j)*3.5}`;
+  causPaths.push({p:el('path',{d,stroke:'#fff','stroke-width':1.3,fill:'none','stroke-dasharray':'34 46','stroke-linecap':'round'},caus),o:rnd()*80,v:(j%2?1:-.7)*(14+rnd()*10)});}
+// 수중 조명
+const uw=$('uwLights');[260,490,720,950].forEach(x=>{el('ellipse',{cx:x,cy:332,rx:46,ry:22,fill:'url(#uwG)'},uw);el('ellipse',{cx:x,cy:728,rx:46,ry:22,fill:'url(#uwG)'},uw);});
+// 레인 로프
+const ropes=$('ropes');const ropeCol=['#e2574c','#3d7dd8','#f2c14e','#3d7dd8'];
+for(let k=1;k<5;k++){const y=POOL.y+k*POOL.lane;
+  el('line',{x1:150,y1:y,x2:1070,y2:y,stroke:'#0c2a44','stroke-opacity':.3,'stroke-width':1},ropes);
+  el('line',{x1:154,y1:y,x2:1066,y2:y,stroke:ropeCol[k-1],'stroke-width':6,'stroke-linecap':'round','stroke-dasharray':'0.1 16'},ropes);
+  el('line',{x1:162,y1:y,x2:1066,y2:y,stroke:'#f6f8fb','stroke-width':6,'stroke-linecap':'round','stroke-dasharray':'0.1 16'},ropes);}
+// 출발대·레인 이름
+const LANES=[
+  {name:'초급',speed:58, styles:['kick','free']},
+  {name:'중급',speed:92, styles:['start','start']},
+  {name:'마스터즈',speed:118,styles:['fly']},
+  {name:'연수',speed:132,styles:['fly']},
+  {name:'자유',speed:74, styles:['free']},
+];
+const blocks=$('blocks');
+LANES.forEach((L,i)=>{const cy=POOL.y+i*POOL.lane+40;
+  el('rect',{x:108,y:cy-16,width:30,height:32,rx:3,class:'f-frame ink'},blocks);
+  el('text',{x:123,y:cy+5,'text-anchor':'middle','font-size':15,class:'t'},blocks).textContent=i+1;
+});
+
+/* ---------- 수영하는 사람들 ---------- */
+const CAPS=['#e2574c','#f2c14e','#3d7dd8','#ffffff','#2f2f3a','#e88fb0','#5bbf8a','#9b6fd1'];
+const SUITS=['#1f2a44','#2f2f3a','#7a2e3b','#1f6f78','#3b4a8a'];
+const X0=176,X1=1044,S=X1-X0,T=46,TOTAL=2*S+2*T;
+const BX=123,ENTRY=222,GLIDE=310,ST={stand:1.3,crouch:.6,fly:.62,glide:.75,climb:1.0};
+const SW_S0=GLIDE-X0,SW_END=2*S+T;
+const OL='#1f2a44',SKIN='#f1c9a5';
+const swimmers=[];const sg=$('swimmers');
+LANES.forEach((L,i)=>{const top=POOL.y+i*POOL.lane;const n=L.styles.length;
+  L.styles.forEach((style,k)=>{
+    const cap=CAPS[Math.floor(rnd()*CAPS.length)],suit=SUITS[Math.floor(rnd()*SUITS.length)];
+    const g=el('g',{},sg);
+    const wake=el('path',{d:'M-22 -3 L-42 -10 M-22 3 L-42 10',stroke:'#fff','stroke-opacity':.35,'stroke-width':1.2,fill:'none'},g);
+    const splash=el('circle',{cx:-25,cy:0,r:3,fill:'#fff'},g);
+    const legs=el('path',{stroke:'#f1c9a5','stroke-width':3.2,'stroke-linecap':'round',fill:'none'},g);
+    const arms=el('path',{stroke:'#f1c9a5','stroke-width':3,'stroke-linecap':'round',fill:'none'},g);
+    let board=null;if(style==='kick')board=el('rect',{x:20,y:-7,width:13,height:14,rx:4,fill:CAPS[(i+k)%3===0?2:1],stroke:'#1f2a44','stroke-width':1},g);
+    el('ellipse',{cx:-1,cy:0,rx:12,ry:5.5,fill:suit,stroke:'#1f2a44','stroke-width':1},g);
+    const head=el('circle',{cx:12,cy:0,r:5.2,fill:cap,stroke:'#1f2a44','stroke-width':1},g);
+    const side=el('path',{fill:'none',stroke:'#fff','stroke-width':1.4,'stroke-linecap':'round',opacity:0},g);
+    const sw={g,arms,legs,splash,head,side,style,s:k*TOTAL/n+rnd()*60,p:rnd()*6.28,speed:L.speed*(style==='fly'?.97:1),
+      yDown:top+57,yUp:top+23,yC:top+40};
+    if(style==='start')makeStarter(sw,cap,suit,k,n);
+    swimmers.push(sw);
+  });
+});
+/* ---------- 2번 레인: 출발대 스타트 ---------- */
+function makeStarter(sw,cap,suit,k,n,swimStyle){
+  sw.style=swimStyle||'free';sw.start=true;
+  const st=$('starters');
+  sw.shadow=el('ellipse',{rx:20,ry:6,fill:'#0a1a2c',opacity:0},st);
+  sw.standG=el('g',{display:'none'},st);
+  sw.armL=el('circle',{r:3,fill:SKIN,stroke:OL,'stroke-width':.8},sw.standG);
+  sw.armR=el('circle',{r:3,fill:SKIN,stroke:OL,'stroke-width':.8},sw.standG);
+  el('ellipse',{rx:6,ry:11,fill:suit,stroke:OL,'stroke-width':1},sw.standG);
+  el('circle',{cx:1,r:5.6,fill:cap,stroke:OL,'stroke-width':1},sw.standG);
+  sw.diveG=el('g',{display:'none'},st);
+  el('path',{d:'M-9 -1.5L-23 -1M-9 1.5L-23 1',stroke:SKIN,'stroke-width':3.2,'stroke-linecap':'round'},sw.diveG);
+  el('path',{d:'M5 -3.5L24 -1.2M5 3.5L24 1.2',stroke:SKIN,'stroke-width':3,'stroke-linecap':'round'},sw.diveG);
+  el('ellipse',{cx:-1,rx:12,ry:5.5,fill:suit,stroke:OL,'stroke-width':1},sw.diveG);
+  el('circle',{cx:11,r:5,fill:cap,stroke:OL,'stroke-width':1},sw.diveG);
+  sw.ring=el('g',{opacity:0},$('swimmers'));
+  sw.ring1=el('ellipse',{fill:'none',stroke:'#fff','stroke-width':1.6},sw.ring);
+  sw.ring2=el('ellipse',{fill:'none',stroke:'#fff','stroke-width':1},sw.ring);
+  sw.swimDur=(SW_END-SW_S0)/sw.speed;
+  sw.Tc=ST.stand+ST.crouch+ST.fly+ST.glide+sw.swimDur+ST.climb;
+  sw.t=k*sw.Tc/n;
+}
+function updStarter(sw,dt){
+  sw.t=(sw.t+dt)%sw.Tc;let t=sw.t;
+  const show=(e,on)=>e.setAttribute('display',on?'inline':'none');
+  show(sw.standG,false);show(sw.diveG,false);sw.g.setAttribute('display','none');
+  sw.shadow.setAttribute('opacity',0);sw.ring.setAttribute('opacity',0);
+  const ease=u=>1-(1-u)*(1-u);
+  const bub=(x,y)=>{if(sw.bubble)sw.bubble.setAttribute('transform',`translate(${x.toFixed(1)},${(y-20).toFixed(1)}) rotate(${PORTRAIT?-90:0})`);};
+  if(t<ST.stand+ST.crouch){ // 출발대 위: 서 있다가 웅크리기
+    const c=t>ST.stand?(t-ST.stand)/ST.crouch:0;
+    show(sw.standG,true);
+    sw.standG.setAttribute('transform',`translate(${BX+3*c},${sw.yC}) scale(${1-.12*c})`);
+    sw.armL.setAttribute('cx',(1+9*c).toFixed(1));sw.armL.setAttribute('cy',(-11+5*c).toFixed(1));
+    sw.armR.setAttribute('cx',(1+9*c).toFixed(1));sw.armR.setAttribute('cy',(11-5*c).toFixed(1));
+    bub(BX+3*c,sw.yC);
+    return;}
+  t-=ST.stand+ST.crouch;
+  if(t<ST.fly){ // 공중 비행
+    const u=t/ST.fly,z=Math.sin(Math.PI*u);
+    const x=BX+(ENTRY-BX)*u,y=sw.yC+(sw.yDown-sw.yC)*u;
+    show(sw.diveG,true);sw.diveG.setAttribute('transform',`translate(${x.toFixed(1)},${y.toFixed(1)}) scale(${(1+.4*z).toFixed(3)})`);
+    sw.shadow.setAttribute('cx',(x+6+10*z).toFixed(1));sw.shadow.setAttribute('cy',(y+8+12*z).toFixed(1));
+    sw.shadow.setAttribute('opacity',(.22*(1-.4*z)*(x>150?1:.6)).toFixed(2));
+    bub(x,y);
+    return;}
+  t-=ST.fly;
+  const ringAt=u=>{sw.ring.setAttribute('opacity',(.85*(1-u)).toFixed(2));
+    sw.ring1.setAttribute('cx',ENTRY+8);sw.ring1.setAttribute('cy',sw.yDown);sw.ring1.setAttribute('rx',(6+30*u).toFixed(1));sw.ring1.setAttribute('ry',(4+16*u).toFixed(1));
+    sw.ring2.setAttribute('cx',ENTRY+8);sw.ring2.setAttribute('cy',sw.yDown);sw.ring2.setAttribute('rx',(3+16*u).toFixed(1));sw.ring2.setAttribute('ry',(2+9*u).toFixed(1));};
+  if(t<ST.glide){ // 입수 후 잠영
+    const u=t/ST.glide;ringAt(u);
+    const gx=ENTRY+(GLIDE-ENTRY)*ease(u);
+    sw.g.setAttribute('display','inline');sw.g.setAttribute('opacity',(.45+.55*u*u).toFixed(2));
+    sw.g.setAttribute('transform',`translate(${gx.toFixed(1)},${sw.yDown}) rotate(0)`);
+    sw.arms.setAttribute('d','M5 -3.5L24 -1.2M5 3.5L24 1.2');sw.legs.setAttribute('d',`M-9 -1.5L-22 ${(-1+1.5*Math.sin(t*20)).toFixed(1)}M-9 1.5L-22 ${(1+1.5*Math.sin(t*20)).toFixed(1)}`);
+    sw.splash.setAttribute('opacity',0);
+    bub(gx,sw.yDown);
+    return;}
+  t-=ST.glide;
+  if(t<sw.swimDur){ // 수영
+    sw.g.setAttribute('display','inline');sw.g.setAttribute('opacity',1);
+    sw.s=SW_S0+t*sw.speed;sw.p+=dt*2*Math.PI*(sw.speed/70);
+    const q=pos(sw);sw.g.setAttribute('transform',`translate(${q.x.toFixed(1)},${q.y.toFixed(1)}) rotate(${q.a.toFixed(1)})`);drawSwimmer(sw);
+    bub(q.x,q.y);
+    return;}
+  t-=sw.swimDur; // 벽 터치 후 올라와서 출발대로
+  const u=t/ST.climb,e=u*u*(3-2*u);
+  show(sw.standG,true);
+  const cx=150-(150-BX)*e,cy=sw.yUp+(sw.yC-sw.yUp)*e;
+  sw.standG.setAttribute('transform',`translate(${cx.toFixed(1)},${cy.toFixed(1)}) scale(${(.85+.15*e).toFixed(3)})`);
+  sw.standG.setAttribute('opacity',Math.min(1,u*3).toFixed(2));
+  sw.armL.setAttribute('cx',1);sw.armL.setAttribute('cy',-11);sw.armR.setAttribute('cx',1);sw.armR.setAttribute('cy',11);
+  bub(cx,cy);
+}
+function pos(sw){let s=((sw.s%TOTAL)+TOTAL)%TOTAL;let x,y,a;
+  const sm=u=>u*u*(3-2*u);
+  if(s<S){x=X0+s;y=sw.yDown;a=0;}
+  else if(s<S+T){const u=(s-S)/T;x=X1+Math.sin(u*Math.PI)*8;y=sw.yDown+(sw.yUp-sw.yDown)*sm(u);a=-180*u;}
+  else if(s<2*S+T){x=X1-(s-S-T);y=sw.yUp;a=180;}
+  else{const u=(s-2*S-T)/T;x=X0-Math.sin(u*Math.PI)*8;y=sw.yUp+(sw.yDown-sw.yUp)*sm(u);a=180-180*u;}
+  return{x,y,a};}
+function drawSwimmer(sw){const p=sw.p,c=Math.cos(p),s=Math.sin(p),mx=Math.max;let a='',l='',sp=.0;
+  switch(sw.style){
+    case 'free':
+      a=`M5 -4L${5+13*c} ${-4-3*mx(0,s)}M5 4L${5-13*c} ${4+3*mx(0,-s)}`;
+      l=`M-9 -2L-21 ${-3+2*Math.sin(2*p)}M-9 2L-21 ${3-2*Math.sin(2*p)}`;sp=.35+.3*Math.abs(Math.sin(2*p));break;
+    case 'fly':{const f=((p%(2*Math.PI))+2*Math.PI)%(2*Math.PI);
+      // 당기기(0~π): 몸 아래로 좁게 / 리커버리(π~2π): 양팔을 크게 벌려 앞으로
+      const ax=5+16*Math.cos(f),ay=f<Math.PI?4+4*Math.sin(f):4+17*Math.sin(f-Math.PI);
+      a=`M5 -4Q${ax*.6} ${-ay*.9} ${ax} ${-ay}M5 4Q${ax*.6} ${ay*.9} ${ax} ${ay}`;
+      const kk=Math.sin(2*f);
+      l=`M-9 -1.5L${-21-2*kk} -1.2M-9 1.5L${-21-2*kk} 1.2`;
+      sp=.55*mx(0,kk);
+      const entry=mx(0,Math.cos(f))**6;sw.side.setAttribute('d','M17 -9a4 3 0 1 0 6 -2M17 9a4 3 0 1 1 6 2');sw.side.setAttribute('opacity',(entry*.8).toFixed(2));
+      const lift=mx(0,Math.sin(f-Math.PI*.2));sw.head.setAttribute('r',(5.2+1.2*lift).toFixed(2));sw.head.setAttribute('cx',(12+1.5*lift).toFixed(2));
+      break;}
+    case 'breast':{const w=mx(0,s),k=mx(0,Math.sin(p+2));
+      a=`M5 -4L${8+9*(.5+.5*c)} ${-3-9*w}M5 4L${8+9*(.5+.5*c)} ${3+9*w}`;
+      l=`M-9 -2L${-19+4*k} ${-3-7*k}M-9 2L${-19+4*k} ${3+7*k}`;sp=.25*k;break;}
+    case 'back':
+      a=`M5 -4L${5+15*c} ${-4-5*mx(0,s)}M5 4L${5-15*c} ${4+5*mx(0,-s)}`;
+      l=`M-9 -2L-21 ${-3+2.4*Math.sin(2*p+1)}M-9 2L-21 ${3-2.4*Math.sin(2*p+1)}`;sp=.35+.3*Math.abs(Math.sin(2*p));break;
+    case 'kick':
+      a='M5 -4L20 -3M5 4L20 3';
+      l=`M-9 -2L-21 ${-3+2.2*Math.sin(3*p)}M-9 2L-21 ${3-2.2*Math.sin(3*p)}`;sp=.35+.3*Math.abs(Math.sin(3*p));break;}
+  sw.arms.setAttribute('d',a);sw.legs.setAttribute('d',l);sw.splash.setAttribute('opacity',sp.toFixed(2));}
+
+/* ---------- 방문자 입장: 팝업에서 이름·레인을 고르면 '나' 캐릭터가 그 레인에 입수 ---------- */
+function laneFromHash(){
+  const m=location.hash.match(/lane(\d)/i);
+  if(!m)return null;
+  const n=+m[1];
+  return(n>=1&&n<=LANES.length)?n-1:null;
+}
+const OTHER_CAPS=['#17b8a0','#f2994a','#9b6fd1','#2d9cdb','#e2574c'];
+const STYLE_OPTIONS=['free','back','fly','breast','kick'];
+function hashKey(s){let h=0;for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))|0;return Math.abs(h);}
+
+/* ---------- 복장(수영복·수모) 패턴: 틀(family) × 배색(palette) 조합 ---------- */
+const WEAR_FAMILIES={
+  stripeH:{label:'가로 스트라이프',w:6,h:6,draw(p,a,b){el('rect',{width:6,height:6,fill:b},p);el('rect',{width:6,height:3,fill:a},p);}},
+  stripeV:{label:'세로 스트라이프',w:6,h:6,draw(p,a,b){el('rect',{width:6,height:6,fill:b},p);el('rect',{width:3,height:6,fill:a},p);}},
+  dot:{label:'폴카도트',w:6,h:6,draw(p,a,b){el('rect',{width:6,height:6,fill:b},p);el('circle',{cx:3,cy:3,r:1.6,fill:a},p);}},
+  check:{label:'체크',w:6,h:6,draw(p,a,b){el('rect',{width:6,height:6,fill:b},p);el('rect',{x:0,y:0,width:3,height:3,fill:a},p);el('rect',{x:3,y:3,width:3,height:3,fill:a},p);}},
+  colorblock:{label:'컬러블록',w:24,h:24,draw(p,a,b){el('rect',{width:24,height:24,fill:b},p);el('polygon',{points:'0,0 24,0 0,24',fill:a},p);}},
+  tiedye:{label:'타이다이',w:8,h:8,draw(p,a,b){el('rect',{width:8,height:8,fill:b},p);
+    el('circle',{cx:2,cy:2,r:2.2,fill:a,'fill-opacity':.75},p);el('circle',{cx:6,cy:5,r:1.8,fill:a,'fill-opacity':.6},p);el('circle',{cx:4,cy:7,r:1.4,fill:a,'fill-opacity':.7},p);}},
+  floral:{label:'플로럴',w:8,h:8,draw(p,a,b){el('rect',{width:8,height:8,fill:b},p);
+    [[4,2],[6,4],[4,6],[2,4]].forEach(([cx,cy])=>el('circle',{cx,cy,r:1.3,fill:a},p));el('circle',{cx:4,cy:4,r:.9,fill:a},p);}},
+  leopard:{label:'레오파드',w:7,h:7,draw(p,a,b){el('rect',{width:7,height:7,fill:b},p);
+    [[1.5,1.5],[5,2.5],[3,5.5]].forEach(([cx,cy])=>el('circle',{cx,cy,r:1.1,fill:a,stroke:OL,'stroke-width':.3},p));}},
+  camo:{label:'카모플라주',w:10,h:10,draw(p,a,b){el('rect',{width:10,height:10,fill:b},p);
+    el('path',{d:'M0 3 Q3 0 6 2 Q9 3 8 6 Q6 9 2 8 Q-1 6 0 3Z',fill:a,'fill-opacity':.85},p);
+    el('path',{d:'M6 6 Q9 5 10 8 L10 10 L6 10 Q5 8 6 6Z',fill:a,'fill-opacity':.6},p);}},
+  gradient:{label:'그라데이션',gradient:true,draw(g,a,b){el('stop',{offset:0,'stop-color':a},g);el('stop',{offset:1,'stop-color':b},g);}},
+  chevron:{label:'셰브론',w:8,h:4,draw(p,a,b){el('rect',{width:8,height:4,fill:b},p);el('path',{d:'M0 4 L2 0 L4 4 L6 0 L8 4',fill:'none',stroke:a,'stroke-width':1.6},p);}},
+  argyle:{label:'아가일',w:10,h:10,draw(p,a,b){el('rect',{width:10,height:10,fill:b},p);
+    el('path',{d:'M0 5 L5 0 L10 5 L5 10Z',fill:'none',stroke:a,'stroke-width':.6},p);
+    el('path',{d:'M-5 5 L0 0 M10 0 L15 5 M-5 5 L0 10 M10 10 L15 5',stroke:a,'stroke-width':.4},p);}},
+  confetti:{label:'컨페티',w:8,h:8,draw(p,a,b){el('rect',{width:8,height:8,fill:b},p);
+    el('circle',{cx:1.5,cy:2,r:.7,fill:a},p);el('rect',{x:5,y:1,width:1.2,height:1.2,fill:a,transform:'rotate(20 5.6 1.6)'},p);
+    el('line',{x1:3,y1:6,x2:4.2,y2:7,stroke:a,'stroke-width':.8},p);el('circle',{cx:6.5,cy:6,r:.5,fill:a},p);}},
+};
+const WEAR_PALETTES=[
+  ['#e2574c','#f6e1c9'],['#3d7dd8','#eaf4ff'],['#2f9e6a','#eafaf1'],['#f2994a','#fff3e0'],
+  ['#9b6fd1','#f3ecff'],['#17b8a0','#e6fff9'],['#e85d9e','#ffeef7'],['#2d2d3a','#ffd166'],
+  ['#ff2e63','#ffe15d'],['#06b6d4','#fbbf24'],['#c0392b','#f1c40f'],['#1f2a44','#f1c9a5'],
+];
+const WEAR_COMBOS=[];
+Object.keys(WEAR_FAMILIES).forEach(fk=>WEAR_PALETTES.forEach((pal,pi)=>{
+  WEAR_COMBOS.push({id:`${fk}-${pi}`,family:fk,a:pal[0],b:pal[1]});
+}));
+const wearDefsCreated=new Set();
+function ensureWearDef(comboId){
+  const url=`url(#wear-${comboId})`;
+  if(wearDefsCreated.has(comboId))return url;
+  const combo=WEAR_COMBOS.find(c=>c.id===comboId);
+  if(!combo)return null;
+  const fam=WEAR_FAMILIES[combo.family];
+  const defs=$('scene').querySelector('defs');
+  if(fam.gradient){
+    const g=el('linearGradient',{id:`wear-${comboId}`,x1:0,y1:0,x2:0,y2:1},defs);
+    fam.draw(g,combo.a,combo.b);
+  }else{
+    const p=el('pattern',{id:`wear-${comboId}`,width:fam.w,height:fam.h,patternUnits:'userSpaceOnUse'},defs);
+    fam.draw(p,combo.a,combo.b);
+  }
+  wearDefsCreated.add(comboId);
+  return url;
+}
+function sampleRandom(arr,n){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a.slice(0,n);}
+function sampleUniqueFamilyWear(n){
+  return sampleRandom(Object.keys(WEAR_FAMILIES),n).map(fk=>{
+    const combos=WEAR_COMBOS.filter(c=>c.family===fk);
+    return combos[Math.floor(Math.random()*combos.length)];
+  });
+}
+
+const visitors=new Map();
+function addVisitor(key,laneIdx,label,isMe,styleIn,wearId,genderIn){
+  if(visitors.has(key))return;
+  const L=LANES[laneIdx],top=POOL.y+laneIdx*POOL.lane;
+  const style=STYLE_OPTIONS.includes(styleIn)?styleIn:'free';
+  const gender=genderIn==='m'?'m':'f';
+  const cap=isMe?'#ff2e63':OTHER_CAPS[hashKey(key)%OTHER_CAPS.length];
+  const suit=isMe?'#15203d':'#1c2b3a';
+  const wearFill=wearId?ensureWearDef(wearId):null;
+  const capFill=wearFill||cap;
+  const suitFill=wearFill||suit;
+  const g=el('g',{},sg);
+  el('path',{d:'M-22 -3 L-42 -10 M-22 3 L-42 10',stroke:'#fff','stroke-opacity':.35,'stroke-width':1.2,fill:'none'},g);
+  const splash=el('circle',{cx:-25,cy:0,r:3,fill:'#fff'},g);
+  const legs=el('path',{stroke:SKIN,'stroke-width':3.2,'stroke-linecap':'round',fill:'none'},g);
+  const arms=el('path',{stroke:SKIN,'stroke-width':3,'stroke-linecap':'round',fill:'none'},g);
+  if(gender==='m'){
+    el('ellipse',{cx:0,cy:0,rx:11,ry:5.3,fill:SKIN,stroke:OL,'stroke-width':1},g);
+    el('rect',{x:-15,y:-4.3,width:9,height:8.6,rx:2.6,fill:suitFill,stroke:OL,'stroke-width':1},g);
+  }else{
+    el('ellipse',{cx:-1,cy:0,rx:12,ry:5.5,fill:suitFill,stroke:OL,'stroke-width':1},g);
+  }
+  const head=el('circle',{cx:12,cy:0,r:5.2,fill:style==='back'?SKIN:capFill,stroke:OL,'stroke-width':1},g);
+  const side=el('path',{fill:'none',stroke:'#fff','stroke-width':1.4,'stroke-linecap':'round',opacity:0},g);
+  if(style==='kick')el('rect',{x:20,y:-7,width:13,height:14,rx:4,fill:'#f2c14e',stroke:OL,'stroke-width':1},g);
+  if(style==='back'){
+    el('ellipse',{cx:16.3,cy:0,rx:1.1,ry:3.2,fill:capFill,stroke:OL,'stroke-width':1},g);
+    el('ellipse',{cx:11.6,cy:-2,rx:2.2,ry:1.8,fill:'none',stroke:OL,'stroke-width':1},g);
+    el('ellipse',{cx:11.6,cy:2,rx:2.2,ry:1.8,fill:'none',stroke:OL,'stroke-width':1},g);
+    el('line',{x1:11.6,y1:-0.5,x2:11.6,y2:0.5,stroke:OL,'stroke-width':1},g);
+  }
+  const sw={g,arms,legs,splash,head,side,style,s:0,p:0,speed:L.speed,yDown:top+57,yUp:top+23,yC:top+40};
+  makeStarter(sw,capFill,suitFill,0,1,style);
+  sw.t=rnd()*sw.Tc;
+  sw.bubble=el('g',{},$('starters'));
+  const bubbleLabel=isMe?`${label}(나)`:label;
+  const hw=Math.max(19,8+bubbleLabel.length*8);
+  el('path',{d:`M${-hw} -12 H${hw} V8 H4.5 L0 17.5 L-4.5 8 H${-hw} Z`,fill:'#fff',stroke:OL,'stroke-width':1.4},sw.bubble);
+  el('text',{x:0,y:3,'text-anchor':'middle','font-size':15,fill:OL},sw.bubble).textContent=bubbleLabel;
+  swimmers.push(sw);
+  visitors.set(key,sw);
+  updateStatus();
+}
+function removeVisitor(key){
+  const sw=visitors.get(key);if(!sw)return;
+  [sw.g,sw.shadow,sw.standG,sw.diveG,sw.ring,sw.bubble].forEach(n=>n&&n.remove());
+  const idx=swimmers.indexOf(sw);if(idx>-1)swimmers.splice(idx,1);
+  visitors.delete(key);
+  updateStatus();
+}
+function updateStatus(){
+  const n=visitors.size;
+  $('statusDot').classList.toggle('live',n>0);
+  $('statusText').textContent=n<=0?'조용히 구경하는 중':n===1?'지금 혼자 입수했어요':`지금 ${n}명 함께 수영 중`;
+}
+
+/* ---------- 실시간 공유(Firebase Realtime Database) ----------
+   console.firebase.google.com 에서 프로젝트 생성 → Realtime Database 활성화 →
+   프로젝트 설정 > SDK 설정에서 나오는 값으로 아래 FIREBASE_CONFIG를 채우면 동작합니다.
+   설정 전에는(REPLACE_ME 그대로) 나만 보이는 로컬 모드로 동작합니다. */
+const FIREBASE_CONFIG={
+  apiKey:"AIzaSyDk3EM7WCj89R97nkom84W0B1HqwKjHy-c",
+  authDomain:"pool-day-16829.firebaseapp.com",
+  databaseURL:"https://pool-day-16829-default-rtdb.firebaseio.com",
+  projectId:"pool-day-16829",
+  storageBucket:"pool-day-16829.firebasestorage.app",
+  messagingSenderId:"455299990081",
+  appId:"1:455299990081:web:b1a2d05a0a2cdaa14f7cc0",
+  measurementId:"G-LR0CDTD4PY",
+};
+let fb=null,myKey=null,myRef=null,entered=false,myName=null,myLaneIdx=null,myStyleVal=null,myWear=null,myGender='f';
+const MAX_VISITORS=10;
+const STALE_MS=30*60*1000;
+(async function initFirebase(){
+  if(FIREBASE_CONFIG.apiKey==='REPLACE_ME'){console.warn('Firebase 설정 전: 나만 보이는 로컬 모드로 동작합니다.');return;}
+  try{
+    const{initializeApp}=await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js');
+    const{getAuth,signInAnonymously,onAuthStateChanged}=await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js');
+    const{getDatabase,ref,set,remove,onDisconnect,onChildAdded,onChildChanged,onChildRemoved}=await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js');
+    const app=initializeApp(FIREBASE_CONFIG);
+    const auth=getAuth(app);
+    const db=getDatabase(app);
+    const swimmersRef=ref(db,'swimmers');
+    const isFresh=v=>!(v.t>0)||Date.now()-v.t<STALE_MS;
+    const validSnap=v=>v&&typeof v.name==='string'&&v.name.length>=1&&v.name.length<=4
+      &&Number.isFinite(v.lane)&&v.lane>=0&&v.lane<LANES.length
+      &&STYLE_OPTIONS.includes(v.style)
+      &&(v.gender==='f'||v.gender==='m')
+      &&(v.wear==null||(typeof v.wear==='string'&&v.wear.length<=40));
+    const handleSnap=snap=>{const v=snap.val();
+      if(!validSnap(v)||!isFresh(v)){removeVisitor(snap.key);return;}
+      if(visitors.has(snap.key))removeVisitor(snap.key);
+      addVisitor(snap.key,v.lane,String(v.name).slice(0,4),snap.key===myKey,v.style,v.wear,v.gender);};
+    onChildAdded(swimmersRef,handleSnap);
+    onChildChanged(swimmersRef,handleSnap);
+    onChildRemoved(swimmersRef,snap=>removeVisitor(snap.key));
+    await new Promise((resolve,reject)=>{
+      onAuthStateChanged(auth,user=>{
+        if(!user)return;
+        myKey=user.uid;myRef=ref(db,'swimmers/'+user.uid);
+        resolve();
+      },reject);
+      signInAnonymously(auth).catch(reject);
+    });
+    fb={set,remove,onDisconnect};
+  }catch(e){console.warn('Firebase 연결 실패, 로컬 모드로 동작합니다.',e);}
+})();
+/* ---------- 입장 팝업 ---------- */
+const RANDOM_NAMES=['나루토','루피','조로','나미','쵸파','로빈','손오공','베지터','피콜로','짱구','철수','맹구','유리','훈이','코난','지우','피카츄','꼬부기','도라에몽','노진구','이슬이','퉁퉁이','비실이','토토로','하울','치히로','폰요','키키','아톰','뽀로로','에디','패티'];
+const BAD_WORDS=['시발','씨발','씨팔','개새끼','개새','병신','ㅅㅂ','ㅄ','ㅂㅅ','지랄','좆','존나','창녀','걸레','미친놈','미친년','fuck','shit','bitch','nigger','cunt'];
+function hasBadWord(s){const t=s.toLowerCase().replace(/\s+/g,'');return BAD_WORDS.some(w=>t.includes(w));}
+const modal=$('entryModal'),nameInput=$('nameInput'),enterBtn=$('enterBtn'),skipBtn=$('skipBtn'),nameHint=$('nameHint');
+const modalTitle=$('modalTitle'),capacityHint=$('capacityHint'),entryChip=$('entryChip'),wearChoiceEl=$('wearChoice');
+const laneBtns=[...document.querySelectorAll('.laneChoice button')];
+const styleBtns=[...document.querySelectorAll('.styleChoice button')];
+const genderBtns=[...document.querySelectorAll('.genderChoice button')];
+nameInput.value=RANDOM_NAMES[Math.floor(Math.random()*RANDOM_NAMES.length)];
+const WEAR_SHOWN=sampleUniqueFamilyWear(7);
+let pickedLane=laneFromHash(),pickedStyle='free',pickedWear=null,pickedGender='f',editing=false;
+function wearSwatchSvg(combo){
+  if(!combo)return '<svg viewBox="0 0 24 24" width="26" height="26"><rect width="24" height="24" rx="4" fill="none" stroke="currentColor" stroke-width="1.4" stroke-dasharray="3 2"/></svg>';
+  ensureWearDef(combo.id);
+  return `<svg viewBox="0 0 24 24" width="26" height="26"><rect width="24" height="24" rx="4" fill="url(#wear-${combo.id})" stroke="${OL}" stroke-width="1"/></svg>`;
+}
+function renderWearChoice(){
+  wearChoiceEl.innerHTML='';
+  const list=[null,...WEAR_SHOWN];
+  if(editing&&myWear&&!WEAR_SHOWN.some(c=>c.id===myWear)){
+    const cur=WEAR_COMBOS.find(c=>c.id===myWear);if(cur)list.push(cur);
+  }
+  list.forEach(combo=>{
+    const b=document.createElement('button');
+    b.type='button';
+    b.innerHTML=wearSwatchSvg(combo)+`<span>${combo?WEAR_FAMILIES[combo.family].label:'아무거나'}</span>`;
+    b.classList.toggle('on',(combo?combo.id:null)===pickedWear);
+    b.addEventListener('click',()=>{
+      pickedWear=combo?combo.id:null;
+      [...wearChoiceEl.children].forEach(x=>x.classList.toggle('on',x===b));
+    });
+    wearChoiceEl.appendChild(b);
+  });
+}
+function syncEnterBtn(){
+  const full=!entered&&visitors.size>=MAX_VISITORS;
+  capacityHint.style.display=full?'':'none';
+  enterBtn.disabled=pickedLane==null||pickedStyle==null||full;
+}
+function updateEntryChip(){
+  entryChip.textContent=entered?`나: ${myName} · ${myLaneIdx+1}번 레인  ✎`:'입장하기';
+  entryChip.setAttribute('aria-label',entered?'내 정보 수정':'수영장 입장');
+}
+function openModal(mode){
+  editing=mode==='edit';
+  nameHint.style.display='none';
+  modalTitle.textContent=editing?'내 정보 바꾸기':'수영장에 입장해요';
+  enterBtn.textContent=editing?'변경하기':'입장하기';
+  skipBtn.textContent=editing?'그만 수영하기':'그냥 구경하기';
+  if(editing){
+    nameInput.value=myName;
+    pickedLane=myLaneIdx;pickedStyle=myStyleVal;pickedWear=myWear;pickedGender=myGender;
+    laneBtns.forEach((b,i)=>b.classList.toggle('on',i===pickedLane));
+    styleBtns.forEach(b=>b.classList.toggle('on',b.dataset.style===pickedStyle));
+    genderBtns.forEach(b=>b.classList.toggle('on',b.dataset.gender===pickedGender));
+  }
+  renderWearChoice();
+  syncEnterBtn();
+  modal.classList.remove('hidden');document.body.classList.add('modalOpen');
+}
+if(pickedLane!=null)laneBtns[pickedLane].classList.add('on');
+styleBtns.find(b=>b.dataset.style===pickedStyle).classList.add('on');
+genderBtns.find(b=>b.dataset.gender===pickedGender).classList.add('on');
+renderWearChoice();
+syncEnterBtn();
+updateEntryChip();
+document.body.classList.add('modalOpen');
+laneBtns.forEach((b,i)=>b.addEventListener('click',()=>{
+  pickedLane=i;laneBtns.forEach(x=>x.classList.toggle('on',x===b));syncEnterBtn();}));
+styleBtns.forEach(b=>b.addEventListener('click',()=>{
+  pickedStyle=b.dataset.style;styleBtns.forEach(x=>x.classList.toggle('on',x===b));syncEnterBtn();}));
+genderBtns.forEach(b=>b.addEventListener('click',()=>{
+  pickedGender=b.dataset.gender;genderBtns.forEach(x=>x.classList.toggle('on',x===b));}));
+function closeModal(){modal.classList.add('hidden');document.body.classList.remove('modalOpen');}
+entryChip.addEventListener('click',()=>openModal(entered?'edit':'enter'));
+nameInput.addEventListener('input',()=>{nameHint.style.display='none';});
+enterBtn.addEventListener('click',async()=>{
+  if(pickedLane==null||pickedStyle==null)return;
+  if(!entered&&visitors.size>=MAX_VISITORS)return;
+  const label=(nameInput.value.trim()||'나').slice(0,4);
+  if(hasBadWord(label)){nameHint.style.display='';return;}
+  closeModal();
+  if(fb&&myRef){
+    const data={name:label,lane:pickedLane,style:pickedStyle,gender:pickedGender,t:Date.now()};
+    if(pickedWear)data.wear=pickedWear;
+    await fb.set(myRef,data);
+    if(!entered)fb.onDisconnect(myRef).remove();
+  }else{
+    if(entered)removeVisitor('local-me');
+    myKey='local-me';
+    addVisitor('local-me',pickedLane,label,true,pickedStyle,pickedWear,pickedGender);
+  }
+  entered=true;myName=label;myLaneIdx=pickedLane;myStyleVal=pickedStyle;myWear=pickedWear;myGender=pickedGender;
+  updateEntryChip();
+});
+skipBtn.addEventListener('click',async()=>{
+  if(editing&&entered){
+    if(fb&&myRef)await fb.remove(myRef);
+    removeVisitor(myKey);
+    entered=false;myName=null;myLaneIdx=null;myStyleVal=null;myWear=null;myGender='f';
+    updateEntryChip();
+  }
+  closeModal();
+});
+
+/* ---------- 시간대별 색 ---------- */
+const K=[
+ {h:5,   sky1:'#151b35',sky2:'#2c3463',wall:'#dde2ea',wall2:'#cdd3dd',deck:'#d5dae2',water:'#3bb6d6',water2:'#227fa0',frame:'#f4f7fb',city:'#1b2140',lamp:1, day:0,  night:1, lit:.9},
+ {h:6.1, sky1:'#36407a',sky2:'#e79c7c',wall:'#dde2ea',wall2:'#cdd3dd',deck:'#d5dae2',water:'#3bb6d6',water2:'#227fa0',frame:'#f4f7fb',city:'#2c2f55',lamp:1, day:.15,night:.5,lit:.7},
+ {h:7.0, sky1:'#86a9d8',sky2:'#f6cfac',wall:'#e2dbcf',wall2:'#d2c9b8',deck:'#e4ddd0',water:'#4fb0ca',water2:'#358bad',frame:'#f3eee4',city:'#97a3bd',lamp:.6,day:.65,night:0, lit:.1},
+ {h:12.5,sky1:'#5aa8e6',sky2:'#cfe8f8',wall:'#f3efe6',wall2:'#e3dccd',deck:'#f2ede3',water:'#4cc3dc',water2:'#2a9cc0',frame:'#fffaf0',city:'#b7c4d6',lamp:0, day:1,  night:0, lit:0},
+ {h:16.5,sky1:'#7aa6d6',sky2:'#f2d6a8',wall:'#f2e8d8',wall2:'#e2d5bf',deck:'#efe4d2',water:'#48b2cf',water2:'#2b8db3',frame:'#fff6e8',city:'#a8b1c6',lamp:.15,day:.85,night:0, lit:0},
+ {h:18.1,sky1:'#6b5f9e',sky2:'#f49a6c',wall:'#ead0bb',wall2:'#d9bca4',deck:'#e7d0bb',water:'#3e98bd',water2:'#2a6f9a',frame:'#fbeee0',city:'#5e5578',lamp:.7,day:.45,night:.1,lit:.45},
+ {h:19.1,sky1:'#2a2f62',sky2:'#8a5d86',wall:'#dde2ea',wall2:'#cdd3dd',deck:'#d5dae2',water:'#3bb6d6',water2:'#227fa0',frame:'#f4f7fb',city:'#20244a',lamp:1, day:.08,night:.65,lit:.9},
+ {h:21,  sky1:'#121731',sky2:'#252d58',wall:'#dde2ea',wall2:'#cdd3dd',deck:'#d5dae2',water:'#3bb6d6',water2:'#227fa0',frame:'#f4f7fb',city:'#181d3a',lamp:1, day:0,  night:1, lit:.8},
+];
+const hx=h=>{const n=parseInt(h.slice(1),16);return[(n>>16)&255,(n>>8)&255,n&255];};
+const toHex=a=>'#'+a.map(v=>Math.round(v).toString(16).padStart(2,'0')).join('');
+const mix=(a,b,t)=>{const A=hx(a),B=hx(b);return toHex(A.map((v,i)=>v+(B[i]-v)*t));};
+const lum=h=>{const[r,g,b]=hx(h);return(.299*r+.587*g+.114*b)/255;};
+function sample(h){let i=0;while(i<K.length-2&&h>K[i+1].h)i++;
+  const A=K[i],B=K[i+1];let t=Math.min(1,Math.max(0,(h-A.h)/(B.h-A.h)));t=t*t*(3-2*t);
+  const o={};for(const k in A){o[k]=typeof A[k]==='string'?mix(A[k],B[k],t):A[k]+(B[k]-A[k])*t;}return o;}
+const root=document.documentElement.style;
+function period(h){return h<6.6?'새벽 수영':h<11.5?'아침 수영':h<15.5?'한낮 자유수영':h<18.6?'해질녘 수영':'저녁 수영';}
+const fmt=h=>{const m=Math.floor(h*60);return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');};
+
+function render(h,dt){
+  const P=sample(h);
+  ['sky1','sky2','wall','wall2','deck','water','water2','frame','city'].forEach(k=>root.setProperty('--'+k,P[k]));
+  // 벽 밝기에 따라 선 색 전환
+  const L=lum(P.wall);const it=Math.min(1,Math.max(0,(L-.42)/.12));
+  root.setProperty('--ink',mix('#c8d0e6','#2c3653',it));
+  // 해
+  const sun=$('sun');
+  if(h>5.8&&h<18.9){const u=(h-5.8)/13.1,alt=Math.sin(Math.PI*u);
+    sun.setAttribute('transform',`translate(${PORTRAIT?250+u*700:60+u*1080},${236-alt*150})`);sun.setAttribute('opacity',1);
+    root.setProperty('--sun',mix('#ff8a50','#fff3c4',Math.min(1,alt*1.6)));}
+  else sun.setAttribute('opacity',0);
+  // 달
+  const np=h>=18.8?(h-18.8)/3.0:(h-5+2.2)/3.0;const moon=$('moon');
+  moon.setAttribute('transform',`translate(${PORTRAIT?320+np*560:140+np*900},${170-Math.sin(Math.PI*Math.min(1,np))*80})`);
+  moon.setAttribute('opacity',P.night.toFixed(2));
+  stars.setAttribute('opacity',(P.night*.9).toFixed(2));
+  cityLit.setAttribute('opacity',P.lit.toFixed(2));
+  clouds.setAttribute('opacity',(.15+P.day*.75).toFixed(2));
+  cloudList.forEach(c=>{c.x+=c.v*dt;if(c.x>1260)c.x=-90;c.g.setAttribute('transform',`translate(${c.x},${c.y}) scale(${c.s})`);});
+  const dl=Math.min(1,P.day*1.7+.08);
+  root.setProperty('--gk',mix('#4a4236','#f4c430',dl));root.setProperty('--gk2',mix('#5a4c30','#ffe27a',dl));root.setProperty('--trunk',mix('#2a2a3a','#7a5a3c',dl));
+  leafList.forEach(f=>{if(dt){f.ph+=dt*2;f.x+=(f.vx+Math.sin(f.ph)*14)*dt;f.y+=f.vy*dt;f.r+=f.vr*dt;
+    if(f.y>234){f.y=62+rnd()*40;f.x=rnd()*1200;}if(f.x>1210)f.x=-10;}
+    f.g.setAttribute('transform',`translate(${f.x.toFixed(1)},${f.y.toFixed(1)}) rotate(${f.r.toFixed(0)})`);});
+  lampGlow.setAttribute('opacity',P.lamp.toFixed(2));
+  refl.setAttribute('opacity',(P.day*.13+P.lamp*.04).toFixed(3));
+  caus.setAttribute('opacity',(.08+P.day*.32).toFixed(2));
+  causPaths.forEach(c=>{c.o+=c.v*dt;c.p.setAttribute('stroke-dashoffset',c.o.toFixed(1));});
+  uw.setAttribute('opacity',(P.night*.95).toFixed(2));
+  // 수영
+  swimmers.forEach(sw=>{if(sw.start){updStarter(sw,dt);return;}if(dt){sw.s+=sw.speed*dt;sw.p+=dt*2*Math.PI*(sw.speed/70)*(sw.style==='kick'?.8:1);}
+    const q=pos(sw);sw.g.setAttribute('transform',`translate(${q.x.toFixed(1)},${q.y.toFixed(1)}) rotate(${q.a.toFixed(1)})`);drawSwimmer(sw);});
+  const tt=fmt(h);$('clock').textContent=`${tt}  ${period(h)}`;
+  $('lblTime').textContent=tt;$('lblPeriod').textContent=period(h);
+}
+
+/* ---------- 재생 ---------- */
+const PLAY_ICON={
+  pause:'<svg viewBox="0 0 24 24" width="18" height="18"><rect x="6" y="5" width="4" height="14" rx="1" fill="currentColor"/><rect x="14" y="5" width="4" height="14" rx="1" fill="currentColor"/></svg>',
+  play:'<svg viewBox="0 0 24 24" width="18" height="18"><path d="M7 4 L19 12 L7 20 Z" fill="currentColor"/></svg>',
+};
+const CYCLE=60;let simT=(5.4-5)/16*CYCLE,playing=true,last=performance.now();
+const scrub=$('scrub');
+function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;
+  if(playing)simT=(simT+dt)%CYCLE;
+  const h=5+16*simT/CYCLE;render(h,playing?dt:0);
+  if(playing&&document.activeElement!==scrub)scrub.value=h.toFixed(2);
+  if(activeRecState)captureFrameInto(activeRecState,now);
+  requestAnimationFrame(loop);}
+scrub.addEventListener('input',()=>{simT=(scrub.value-5)/16*CYCLE;});
+$('play').innerHTML=PLAY_ICON.pause;
+$('play').addEventListener('click',e=>{playing=!playing;
+  e.currentTarget.innerHTML=playing?PLAY_ICON.pause:PLAY_ICON.play;
+  e.currentTarget.setAttribute('aria-label',playing?'일시정지':'재생');
+  e.currentTarget.setAttribute('title',playing?'일시정지':'재생');
+  e.currentTarget.classList.toggle('on',playing);});
+
+/* ---------- 전체화면 + 자동 녹화(10초) ---------- */
+const fsBtn=$('fsBtn');
+fsBtn.innerHTML='<svg viewBox="0 0 24 24" width="18" height="18"><path d="M5 9V5H9M15 5H19V9M19 15V19H15M9 19H5V15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+const REC_FPS=18,REC_MS=10000;
+const REC_COLOR_VARS=['sky1','sky2','wall','wall2','deck','water','water2','frame','city','ink','sun'];
+function currentSceneColors(){
+  const s=document.documentElement.style,o={};
+  REC_COLOR_VARS.forEach(k=>o[k]=s.getPropertyValue('--'+k).trim()||'#000');
+  return o;
+}
+function svgSnapshotDataUrl(){
+  const scene=$('scene');
+  const clone=scene.cloneNode(true);
+  const c=currentSceneColors();
+  const styleEl=document.createElementNS(NS,'style');
+  styleEl.textContent=`.ink{stroke:${c.ink};fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
+.t{fill:${c.ink};font-family:'Gowun Dodum',system-ui,sans-serif}
+.f-wall{fill:${c.wall}} .f-wall2{fill:${c.wall2}} .f-deck{fill:${c.deck}} .f-frame{fill:${c.frame}}
+.f-city{fill:${c.city}} .s-frame{stroke:${c.frame}}`;
+  clone.insertBefore(styleEl,clone.firstChild);
+  clone.querySelectorAll('[style*="var(--"]').forEach(el=>{
+    let s=el.getAttribute('style');
+    REC_COLOR_VARS.forEach(k=>{s=s.split(`var(--${k})`).join(c[k]);});
+    el.setAttribute('style',s);
+  });
+  const xml=new XMLSerializer().serializeToString(clone);
+  return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(xml);
+}
+function pickRecMime(){
+  // webm을 우선한다: 크롬/안드로이드의 MediaRecorder "video/mp4" 출력은
+  // isTypeSupported가 true를 줘도 실제로는 갤러리 앱 등 일부 플레이어가
+  // 못 여는 비표준 구조로 나오는 경우가 있음. webm이 안 되는 브라우저
+  // (iOS Safari 등)에서만 mp4로 폴백 — 거긴 mp4 출력이 정상적임.
+  const cands=['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm','video/mp4;codecs=avc1','video/mp4'];
+  return window.MediaRecorder&&MediaRecorder.isTypeSupported?cands.find(m=>MediaRecorder.isTypeSupported(m))||null:null;
+}
+async function startRecording(){
+  const mime=pickRecMime();
+  if(!window.MediaRecorder||!(HTMLCanvasElement.prototype.captureStream)||!mime)return null;
+  const box=$('scene').getBoundingClientRect();
+  if(!box.width||!box.height)return null;
+  const ratio=box.width/box.height,longSide=1280;
+  let cw,ch;
+  if(box.height>=box.width){ch=longSide;cw=Math.round(ch*ratio);}else{cw=longSide;ch=Math.round(cw/ratio);}
+  const canvas=document.createElement('canvas');canvas.width=cw;canvas.height=ch;
+  const ctx=canvas.getContext('2d');
+  let recorder;
+  try{recorder=new MediaRecorder(canvas.captureStream(REC_FPS),{mimeType:mime,videoBitsPerSecond:5000000});}
+  catch(e){return null;}
+  const chunks=[];
+  recorder.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data);};
+  const state={canvas,ctx,recorder,chunks,mime,capturing:false,lastCapT:0};
+  recorder.start();
+  return state;
+}
+function captureFrameInto(state,now){
+  if(state.capturing||now-state.lastCapT<1000/REC_FPS)return;
+  state.lastCapT=now;state.capturing=true;
+  const img=new Image();
+  img.onload=()=>{try{state.ctx.drawImage(img,0,0,state.canvas.width,state.canvas.height);}catch(e){}state.capturing=false;};
+  img.onerror=()=>{state.capturing=false;};
+  img.src=svgSnapshotDataUrl();
+}
+function finishRecording(state){
+  return new Promise(resolve=>{
+    if(!state){resolve(null);return;}
+    state.recorder.onstop=()=>resolve(new Blob(state.chunks,{type:state.mime.split(';')[0]}));
+    try{state.recorder.stop();}catch(e){resolve(null);}
+  });
+}
+async function saveOrShareBlob(blob){
+  if(!blob||!blob.size)return;
+  const ext=blob.type.includes('mp4')?'mp4':'webm';
+  const file=new File([blob],`pool-day-reel.${ext}`,{type:blob.type});
+  try{
+    if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:'동네 수영장의 하루'});return;}
+  }catch(e){}
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=file.name;document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),10000);
+}
+
+let fsTimer=null,fsTapHandler=null,activeRecState=null,endingFs=false;
+function exitFsRecording(){
+  if(fsTimer){clearTimeout(fsTimer);fsTimer=null;}
+  if(fsTapHandler){document.body.removeEventListener('click',fsTapHandler);fsTapHandler=null;}
+  document.body.classList.remove('fsRecording');
+}
+async function endFsRecording(){
+  if(endingFs)return;endingFs=true;
+  if(document.fullscreenElement)document.exitFullscreen();
+  exitFsRecording();
+  const st=activeRecState;activeRecState=null;
+  if(st){const blob=await finishRecording(st);await saveOrShareBlob(blob);}
+  endingFs=false;
+}
+fsBtn.addEventListener('click',async()=>{
+  try{await document.documentElement.requestFullscreen();}catch(e){}
+  document.body.classList.add('fsRecording');
+  // 전체화면 API가 막혀도(일부 모바일 브라우저) 주소창을 최대한 가리기 위해 살짝 스크롤
+  requestAnimationFrame(()=>{window.scrollTo(0,1);setTimeout(()=>window.scrollTo(0,1),300);});
+  fsTapHandler=endFsRecording;
+  setTimeout(()=>document.body.addEventListener('click',fsTapHandler),0);
+  fsTimer=setTimeout(endFsRecording,REC_MS);
+  activeRecState=await startRecording();
+});
+document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement)endFsRecording();});
+layout();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
